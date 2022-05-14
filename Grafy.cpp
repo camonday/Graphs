@@ -21,13 +21,14 @@ class Graph
     int krawedzie;
     int wierzcholki;
     int start;
+    int maxKraw;
     bool czySkierowany;
 
     struct sasiad{
         int id;
         int wagaKrawedzi;
     };
-    list<sasiad> *listaSasiedztwa = nullptr;
+    list<sasiad>* listaSasiedztwa = nullptr;
     list<sasiad> copyList;
 
     int **macierz = nullptr;
@@ -85,10 +86,10 @@ void Graph::show() {
 }
 
 void Graph::clear() {
-    delete(listaSasiedztwa);
-    listaSasiedztwa =NULL;
-    delete(macierz);
-    macierz =NULL;
+    delete[] listaSasiedztwa;
+    listaSasiedztwa = nullptr;
+    delete[] macierz;
+    macierz = nullptr;
 }
 
 void Graph::create() {
@@ -160,12 +161,12 @@ void Graph::generate(int wierz, int gestosc, bool czySkierowany) {
     clear();
     this->czySkierowany = czySkierowany;
     wierzcholki = wierz;
-    krawedzie = wierzcholki * wierzcholki;      // realizacja rownania:gestosc % = 2*krawedzie/(wierzcholki*wierzcholki - wierzcholki)
-    krawedzie -= wierzcholki;                   // maks ilosc wierzcholkow
-    krawedzie *= gestosc;                       // krawedzie = (w*w - w) * g / 2*100
+    maxKraw = wierzcholki * wierzcholki;      // realizacja rownania:gestosc % = 2*krawedzie/(wierzcholki*wierzcholki - wierzcholki)
+    maxKraw -= wierzcholki;                   // maks ilosc wierzcholkow
+    krawedzie = maxKraw * gestosc;                       // krawedzie = (w*w - w) * g / 2*100
     krawedzie /= 200;
     if(czySkierowany) krawedzie*=2;             // w grafie skierowanym moze byc 2 razy wiecej krawedzi
-
+    else maxKraw /=2;
     int istKraw = 0;                // potrzebne do sprawdzenia, czy mamy 99%
     create();                       //mamy wierzcholki, nie mamy krawedzi
 
@@ -224,7 +225,7 @@ void Graph::generate(int wierz, int gestosc, bool czySkierowany) {
     }
     // if 99 gest - dodaj dodatkowe 1/99 krawedzi i usun losowe 1/99 krawedzi
     if(gestosc==99){
-        for (int i = istKraw/99; i >0 ; --i) {
+        while(istKraw!=maxKraw) {
             addRandConnection(false);
             istKraw++;
         }

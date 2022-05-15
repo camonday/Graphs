@@ -10,6 +10,9 @@
 #include <fstream>
 #include <chrono>
 #include <list>
+#include <queue>
+#include <algorithm>
+
 #define max_weight 100
 
 
@@ -33,11 +36,27 @@ class Graph
 
     int **macierz = nullptr;
 
+    struct krawedz{
+        int poczatek, koniec, waga;
+        string toString(){
+            return "\nPoczatek: " + to_string(poczatek) +"\tKoniec: "+ to_string(koniec) +"\tWaga: "+ to_string(waga);
+        }
+    };
+    struct PorowanajWage{
+        bool operator()(krawedz const& p1, krawedz const&p2)
+        {
+            // return "true" if "p1" jest
+            // przed "p2" w minHeap:
+            return p1.waga > p2.waga;
+        }
+    };
+
+
 public:
     void loadFromFile(string fileName, bool czySkierowany);
     void generate(int wierz, int gestosc, bool czySkierowany); //ustaw zmienna wierzcholki, na podstawie wierz i gest wylicz i ustaw zm kraw
     void show();
-    void run(int mode);
+    void run();
 
 private:
     void clear();
@@ -290,6 +309,97 @@ int Graph::losujWierzcholek() const {
     return rand()%wierzcholki;
 }
 
+void Graph::run() {
+    if(czySkierowany){
+       // runBList();
+        //runBMatrix();
+    }
+    else{
+        runAList();
+        runAMatrix();
+    }
+}
+
+void Graph::runAList() { //Prim for a list
+    list<krawedz> krawedzieMST;
+    list<int> wierzcholkiMST;
+    priority_queue<krawedz, vector<krawedz>,PorowanajWage> sterta;
+    krawedz check{};
+    int koniec;
+    int sum=0;
+
+    //krawedzieMST.push_front(krawedz{start,start,0});
+    wierzcholkiMST.push_front(start);
+    for (auto const& i : listaSasiedztwa[start]) {
+        sterta.push(krawedz{start,i.id,i.wagaKrawedzi});
+    }
+
+    while(wierzcholkiMST.size()!=wierzcholki){
+        check = sterta.top();
+        sterta.pop();
+        koniec = check.koniec;
+        if(std::find(wierzcholkiMST.begin(), wierzcholkiMST.end(), check.koniec)==wierzcholkiMST.end()){
+            if(koniec!=wierzcholkiMST.back()){
+                //dodaj krawedz check do drzewwa rozpinajacego
+                krawedzieMST.push_back(check);
+                wierzcholkiMST.push_front(koniec);
+                for (auto const& i : listaSasiedztwa[koniec]) {
+                    sterta.push(krawedz{koniec,i.id,i.wagaKrawedzi});
+                }
+            }
+        }
+    }
+    cout<<"\n---DLA LISTY---";
+    for (krawedz i : krawedzieMST) {
+        cout<<i.toString();
+        sum+=i.waga;
+    }
+    cout<<"\nSuma wag: "<<sum;
+
+}
+
+void Graph::runAMatrix() {
+    list<krawedz> krawedzieMST;
+    list<int> wierzcholkiMST;
+    priority_queue<krawedz, vector<krawedz>,PorowanajWage> sterta;
+    krawedz check{};
+    int koniec;
+    int sum=0;
+
+    //krawedzieMST.push_front(krawedz{start,start,0});
+    wierzcholkiMST.push_front(start);
+    for (int i=0; i<wierzcholki; i++) {
+        if(macierz[start][i]!=0){
+            sterta.push(krawedz{start,i,macierz[start][i]});
+        }
+    }
+
+    while(wierzcholkiMST.size()!=wierzcholki){
+        check = sterta.top();
+        sterta.pop();
+        koniec = check.koniec;
+        if(std::find(wierzcholkiMST.begin(), wierzcholkiMST.end(), check.koniec)==wierzcholkiMST.end()){
+            if(koniec!=wierzcholkiMST.back()){
+                //dodaj krawedz check do drzewwa rozpinajacego
+                krawedzieMST.push_back(check);
+                wierzcholkiMST.push_front(koniec);
+                for (int i=0; i<wierzcholki; i++) {
+                    if(macierz[koniec][i]!=0){
+                        sterta.push(krawedz{koniec,i,macierz[koniec][i]});
+                    }
+                }
+            }
+        }
+    }
+
+    cout<<"\n\n---DLA MACIERZY---";
+    for (krawedz i : krawedzieMST) {
+        cout<<i.toString();
+        sum+=i.waga;
+    }
+    cout<<"\nSuma wag: "<<sum;
+}
+
 
 Graph myGraph;
 string fileName;
@@ -322,7 +432,12 @@ void createGraph(bool czySkierowany){
     myGraph.generate(wierz, gest, czySkierowany);
     myGraph.show();
 }
-void showGraph(){}
+void showGraph(){
+    myGraph.show();
+}
+void runGraph(){
+    myGraph.run();
+}
 
 void menu_a() {
     char opt;
@@ -346,7 +461,7 @@ void menu_a() {
                 break;
 
             case '4': //tutaj wykonanie algorytmu
-
+                runGraph();
                 break;
 
             case '5':  //tutaj testy

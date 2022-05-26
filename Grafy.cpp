@@ -57,6 +57,10 @@ public:
     void generate(int wierz, int gestosc, bool czySkierowany); //ustaw zmienna wierzcholki, na podstawie wierz i gest wylicz i ustaw zm kraw
     void show();
     void run();
+    void runAList();
+    void runAMatrix();
+    void runBList();
+    void runBMatrix();
 
 private:
     void clear();
@@ -64,10 +68,7 @@ private:
     bool addConection(int A, int B, int waga);
     void showList();
     void showMatrix();
-    void runAList();
-    void runAMatrix();
-    void runBList();
-    void runBMatrix();
+
     void makeCopyList(list<sasiad>);
     void deleteRandConnection();
     void addRandConnection(bool tryb);
@@ -248,6 +249,7 @@ void Graph::generate(int wierz, int gestosc, bool czySkierowany) {
     while(istKraw<krawedzie){
         addRandConnection(false);
         istKraw++;
+       // cout<<"\n"<<istKraw<<" "<<krawedzie;
     }
     // if 99 gest - dodaj dodatkowe 1/99 krawedzi i usun losowe 1/99 krawedzi
     if(gestosc==99){
@@ -257,12 +259,16 @@ void Graph::generate(int wierz, int gestosc, bool czySkierowany) {
         }
          */
          addFullConnection();              //w. alternatywna
-         //cout<<"\ndodalem do 100%";
+         cout<<"\ndodalem do 100%";
          istKraw=maxKraw;
-        while(istKraw!=krawedzie){
+        while(istKraw>krawedzie){
+            for(auto i : listaSasiedztwa[33]){
+
+            }
             deleteRandConnection();
-            //cout<<"\nusuwam";
+
             istKraw--;
+            cout<<"\nusuwam "<<istKraw<<" "<<krawedzie;
         }
     }
 }
@@ -277,6 +283,7 @@ void Graph::addRandConnection(bool tryb) {
         } while (elem1 == elem2);
         waga = rand() % max_weight;
     } while(!addConection(elem2, elem1, waga));
+    //if(tryb) cout<<"\nA: "<<elem1<<" B: "<<elem2<<" w: "<<waga;
 }
 
 void Graph::deleteRandConnection() {
@@ -284,6 +291,7 @@ void Graph::deleteRandConnection() {
     sasiad* check1;
     sasiad* check2 = nullptr;
     do{                                         //1. Wylosuj
+
         do{
             elem1=losujWierzcholek();
         } while (listaSasiedztwa[elem1].size()<2);
@@ -291,7 +299,7 @@ void Graph::deleteRandConnection() {
         check1 = &listaSasiedztwa[elem1].front();
         do{
             if(check1==check2){
-                //cout<<"\n Czy zepsujepowinno byc true";
+                cout<<"\n Czy zepsujepowinno byc true";
                 break;
             }
             check2=&listaSasiedztwa[elem1].front();
@@ -303,24 +311,43 @@ void Graph::deleteRandConnection() {
        // cout<<"\nWylosowalem B usuwanego";
     } while(czyZepsuje(elem1, elem2));            //2. Sprawdz czy nie zaburzysz grafu
     //3. usun
-    //cout<<"\nusunolem ";
+    cout<<"\nusunolem "; cout<<" "<<elem1;
+    cout<<listaSasiedztwa[elem1].back().id;
+    cout<<"\n 1 pezed usu\n";
+    for (auto i:listaSasiedztwa[elem1]) {
+        cout<<i.id<<" ";
+    }
     listaSasiedztwa[elem1].pop_back();
-    //cout<<" 1. ";
+    cout<<" 1. ";
     macierz[elem1][elem2]=0;
-   // cout<<" 2. ";
+   cout<<" 2. ";
     if(!czySkierowany){
-        //cout<<" 3. ";
+        cout<<"\n 3. elem1 sasiady\n";
+        for (auto i:listaSasiedztwa[elem1]) {
+            cout<<i.id<<" ";
+        }
+        cout<<"\n elem2 sasiady przed usu \n";
+        for (auto i:listaSasiedztwa[elem2]) {
+            cout<<i.id<<" ";
+        }
        for(sasiad i = listaSasiedztwa[elem2].front(); i.id!=elem1; i=listaSasiedztwa[elem2].front() ){
            listaSasiedztwa[elem2].push_back(listaSasiedztwa[elem2].front());
            listaSasiedztwa[elem2].pop_front();
+           //cout<<"\ni: "<<i.id<<" elem: "<<elem1;
        }
-        //cout<<" 4. ";
+        cout<<"\n 4. elem 2 sasiady po usu\n";
+
+        for (auto i:listaSasiedztwa[elem2]) {
+            cout<<i.id<<" ";
+        }
+
        listaSasiedztwa[elem2].pop_back();
        macierz[elem2][elem1]=0;
     }
 }
 
 bool Graph::czyZepsuje(int elem1, int elem2) {
+    if(macierz[elem1][elem2]==0){cout<<"\nzepsuloby"; return true;}
     //1 zsumuj wagi wiersza elem 2
     int suma = 0;
     for(int i=0; i<wierzcholki; i++){
@@ -331,7 +358,7 @@ bool Graph::czyZepsuje(int elem1, int elem2) {
     suma -= macierz[elem1][elem2];
     //cout<<"\nczy zepsuje 2: "<<suma;
     //3 sprawdz czy ostrzymales wiecej niz 0
-    if(suma==0) return true;
+    if(suma==0){ cout<<"\nzepsuloby";return true;}
     return false;
 }
 
@@ -379,13 +406,14 @@ void Graph::runAList() { //Prim for a list
             }
         }
     }
+    /*
     cout<<"\n---DLA LISTY---";
     for (krawedz i : krawedzieMST) {
         cout<<i.toString();
         sum+=i.waga;
     }
     cout<<"\nSuma wag: "<<sum;
-
+*/
 }
 
 void Graph::runAMatrix() {
@@ -421,13 +449,14 @@ void Graph::runAMatrix() {
             }
         }
     }
-
+    /*
     cout<<"\n\n---DLA MACIERZY---";
     for (krawedz i : krawedzieMST) {
         cout<<i.toString();
         sum+=i.waga;
     }
     cout<<"\nSuma wag: "<<sum;
+     */
 }
 
 void Graph::addFullConnection() {
@@ -435,7 +464,7 @@ void Graph::addFullConnection() {
         for(int j=0; j< wierzcholki; ++j){
             if(macierz[i][j]==0 && i!=j){ //i!j poniewaz nie ma krawedzi z tylko jednym wierzcholkiem
                 addConection(i,j,rand()%max_weight);
-                cout<<"\ndodalem uzupelniajace";
+                cout<<"\ndodalem uzupelniajace "<<i<<" "<<j;
             }
         }
     }
@@ -481,7 +510,7 @@ void Graph::runBList() {
         //2) usun
         nieprzebadane.pop_front();
     }
-
+/*
     //wyswietl
     cout<<"Poczatek = "<<start;
     for (int i=0; i<wierzcholki; i++) {
@@ -503,6 +532,7 @@ void Graph::runBList() {
         }
 
     }
+    */
 }
 
 void Graph::runBMatrix() {
@@ -522,7 +552,7 @@ void Graph::runBMatrix() {
     }
     tablica[start].d=0;
 
-    cout<<"\n---MACIERZ---\n";
+   // cout<<"\n---MACIERZ---\n";
 
     while(!nieprzebadane.empty()) {
         //wybierz wierzcholek o najmnijeszym d
@@ -553,7 +583,7 @@ void Graph::runBMatrix() {
         //2) usun
         nieprzebadane.pop_front();
     }
-
+/*
     //wyswietl
     cout<<"\nPoczatek: "<<start;
     for (auto const i : tablica) {
@@ -571,11 +601,14 @@ void Graph::runBMatrix() {
             }
         }
     }
+    */
 }
 
 
 Graph myGraph;
 string fileName;
+int sizes[7] ={200, 400, 600, 800, 1000, 1200, 1400};
+int gestosci[3]={20,60,99};
 
 void displayMenu(const string& info)
 {
@@ -612,6 +645,14 @@ void runGraph(){
     myGraph.run();
 }
 
+struct Comma final : std::numpunct<char>
+{
+    char do_decimal_point() const override { return ','; }
+};
+
+steady_clock::time_point timeStart, timeEnd;
+duration<double> timeTemp, timeSum;
+
 void menu_a() {
     char opt;
     string fileName;
@@ -638,6 +679,56 @@ void menu_a() {
                 break;
 
             case '5':  //tutaj testy
+                std::ofstream file("test_prima.txt");
+                //file.imbue(std::locale(std::locale::classic(), new Comma));
+                //file<<"\nlist;matrix";
+                for(int size : sizes){
+                    for(int gestosc : gestosci){
+                        /*if (gestosc==99){
+                            file.close();
+                            return ;
+                        }*/
+                        Graph grafy[50];
+                        cout<<"\nGeneruje grafy wielkosci "<<size<<" i gestosci "<<gestosc<<"\n";
+                        for (int i = 0; i < 50; ++i) {
+                            grafy[i].generate(size,gestosc,false);
+                            cout<<i<<". ";
+                        }
+                        cout<<"\nlista";
+                        timeSum-=timeSum;
+                        for(auto & i : grafy){
+                            timeStart = steady_clock::now();
+
+                            i.runAList();
+
+                            timeEnd = steady_clock::now();
+
+                            timeTemp = duration_cast<duration<double>>(timeEnd - timeStart);
+                            timeSum += timeTemp;
+                            //std::cout << " timeTemp " << timeTemp.count();
+
+                        }
+                        file <<timeSum.count();
+                        cout<<"\nmacierz";
+                        timeSum-=timeSum;
+                        for(auto & i : grafy){
+                            //std::cout << std::endl << i;
+                            timeStart = steady_clock::now();
+
+                            i.runAList();
+
+                            timeEnd = steady_clock::now();
+
+                            timeTemp = duration_cast<duration<double>>(timeEnd - timeStart);
+                            timeSum += timeTemp;
+                            //std::cout << " timeTemp " << timeTemp.count();
+
+                        }
+                        file << ";"<<timeSum.count()<<"\n";
+
+                    }
+                    file.close();
+                }
 
                 break;
 

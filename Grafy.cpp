@@ -23,7 +23,7 @@ class Graph
 {
     int krawedzie;
     int wierzcholki;
-    int start;
+    int start = 0;
     int maxKraw;
     bool czySkierowany;
 
@@ -341,8 +341,8 @@ int Graph::losujWierzcholek() const {
 
 void Graph::run() {
     if(czySkierowany){
-       // runBList();
-        //runBMatrix();
+        runBList();
+        runBMatrix();
     }
     else{
         runAList();
@@ -442,7 +442,113 @@ void Graph::addFullConnection() {
 }
 
 void Graph::runBList() {
+    struct wierzcholekSP {
+            int id;
+            int p;  // p — poprzednik
+            int d;  // d - droga
+    };
+    list<int> nieprzebadane;
+    wierzcholekSP tablica[wierzcholki];
+    wierzcholekSP min{};
+    int wyswietl;
 
+    for (int i=0; i<wierzcholki; i++) {
+        nieprzebadane.push_front(i);
+        tablica[i] = wierzcholekSP{i,INT_MAX,INT_MAX};
+        cout<<"\n"<<tablica[i].d<<" "<<i;
+    }
+    tablica[start].d=0;
+
+    while(!nieprzebadane.empty()) {
+        //wybierz wierzcholek o najmnijeszym d
+        min = tablica[nieprzebadane.front()];
+        for (auto const i : nieprzebadane) {
+            if (min.d > tablica[i].d) min=tablica[i];
+        }
+        //relaksacja sasiadow
+        for (auto const i : listaSasiedztwa[min.id]) {
+            if((i.wagaKrawedzi+min.d)<tablica[i.id].d){
+                tablica[i.id].d = i.wagaKrawedzi+min.d;
+                tablica[i.id].p = min.id;
+                cout<<"\nRelaksacja w: "<<min.id<<" sasiad: "<<i.id;
+                cout<<"\n poprzednik sasiada: "<<tablica[i.id].p;
+            }
+        }
+        //usun wierzcholek z nieprzebadanych
+        //1) przesun min na poczatek
+        while(nieprzebadane.front()!=min.id) {
+            nieprzebadane.push_back(nieprzebadane.front());
+            nieprzebadane.pop_front();
+        }
+        //2) usun
+        nieprzebadane.pop_front();
+    }
+
+    //wyswietl
+    for (int i=0; i<wierzcholki; i++) {
+        if(i!=start){
+        wyswietl = tablica[i].p;
+        cout<<"\nwierzcholek: "<<i<<"waga: "<<tablica[i].d<<"\ndroga: "<<wyswietl;
+
+
+            while (wyswietl != start) {
+                wyswietl = tablica[wyswietl].p;
+                cout << " " << wyswietl;
+            }
+        }
+
+    }
+    cout<<"\nKONIEC LISTY \n\n";
+}
+
+void Graph::runBMatrix() {
+    struct wierzcholekSP {
+        int id;
+        int p;  // p — poprzednik
+        int d;  // d - droga
+    };
+    list<int> nieprzebadane;
+    wierzcholekSP tablica[wierzcholki];
+    wierzcholekSP min{};
+    int wyswietl;
+
+    for (int i=0; i<wierzcholki; ++i) {
+        nieprzebadane.push_front(i);
+        tablica[i] = wierzcholekSP{i,INT_MAX,INT_MAX};
+    }
+
+    while(!nieprzebadane.empty()) {
+        //wybierz wierzcholek o najmnijeszym d
+        min = tablica[nieprzebadane.front()];
+        for (auto const i : nieprzebadane) {
+            if (min.d > tablica[i].d) min=tablica[i];
+        }
+        //relaksacja sasiadow
+        for (int i=0; i<wierzcholki; ++i) {
+            if((macierz[min.id][i]+min.d)<tablica[i].d){
+                tablica[i].d = macierz[min.id][i]+min.d;
+                tablica[i].p = i;
+            }
+        }
+        //usun wierzcholek z nieprzebadanych
+        //1) przesun min na poczatek
+        while(nieprzebadane.front()!=min.id) {
+            nieprzebadane.push_back(nieprzebadane.front());
+            nieprzebadane.pop_front();
+        }
+        //2) usun
+        nieprzebadane.pop_front();
+    }
+
+    //wyswietl
+    for (auto const i : tablica) {
+        cout<<"\nwierzcholek: "<<i.id<<"waga: "<<i.d<<"\ndroga: "<<i.p;
+        wyswietl = i.p;
+        while(wyswietl!=start){
+            wyswietl=tablica[wyswietl].p;
+            cout<<" "<<wyswietl;
+        }
+    }
 }
 
 
@@ -539,7 +645,7 @@ void menu_b() {
                 break;
 
             case '4': //tutaj wykonanie algorytmu
-
+                runGraph();
                 break;
 
             case '5':  //tutaj testy

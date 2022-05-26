@@ -455,7 +455,7 @@ void Graph::runBList() {
     for (int i=0; i<wierzcholki; i++) {
         nieprzebadane.push_front(i);
         tablica[i] = wierzcholekSP{i,INT_MAX,INT_MAX};
-        cout<<"\n"<<tablica[i].d<<" "<<i;
+        //cout<<"\n"<<tablica[i].d<<" "<<i;
     }
     tablica[start].d=0;
 
@@ -470,8 +470,6 @@ void Graph::runBList() {
             if((i.wagaKrawedzi+min.d)<tablica[i.id].d){
                 tablica[i.id].d = i.wagaKrawedzi+min.d;
                 tablica[i.id].p = min.id;
-                cout<<"\nRelaksacja w: "<<min.id<<" sasiad: "<<i.id;
-                cout<<"\n poprzednik sasiada: "<<tablica[i.id].p;
             }
         }
         //usun wierzcholek z nieprzebadanych
@@ -485,20 +483,26 @@ void Graph::runBList() {
     }
 
     //wyswietl
+    cout<<"Poczatek = "<<start;
     for (int i=0; i<wierzcholki; i++) {
+
         if(i!=start){
         wyswietl = tablica[i].p;
-        cout<<"\nwierzcholek: "<<i<<"waga: "<<tablica[i].d<<"\ndroga: "<<wyswietl;
+        cout<<"\nwierzcholek: "<<i<<" waga: "<<tablica[i].d<<"\ndroga: ";
 
-
+            nieprzebadane.push_front(wyswietl);
             while (wyswietl != start) {
                 wyswietl = tablica[wyswietl].p;
-                cout << " " << wyswietl;
+                nieprzebadane.push_front(wyswietl);
             }
+            while(!nieprzebadane.empty()){
+                cout<<nieprzebadane.front()<< " ";
+                nieprzebadane.pop_front();
+            }
+            cout<<i;
         }
 
     }
-    cout<<"\nKONIEC LISTY \n\n";
 }
 
 void Graph::runBMatrix() {
@@ -516,6 +520,9 @@ void Graph::runBMatrix() {
         nieprzebadane.push_front(i);
         tablica[i] = wierzcholekSP{i,INT_MAX,INT_MAX};
     }
+    tablica[start].d=0;
+
+    cout<<"\n---MACIERZ---\n";
 
     while(!nieprzebadane.empty()) {
         //wybierz wierzcholek o najmnijeszym d
@@ -525,9 +532,16 @@ void Graph::runBMatrix() {
         }
         //relaksacja sasiadow
         for (int i=0; i<wierzcholki; ++i) {
-            if((macierz[min.id][i]+min.d)<tablica[i].d){
+            if(0<macierz[min.id][i] && (macierz[min.id][i]+min.d)<tablica[i].d){
+               /* cout<<"\nRelaksacja\n";
+                cout<<"A: "<<min.id<<" B: "<<i;
+                cout<<"\ndroga a: "<<min.d<<" krawedz ab: "<<macierz[min.id][i]<<" razem: "<<macierz[min.id][i]+min.d;
+                cout<<" droga b: "<<tablica[i].d; */
                 tablica[i].d = macierz[min.id][i]+min.d;
-                tablica[i].p = i;
+                tablica[i].p = min.id;
+                //cout<<"\nTeraz droga b: "<<tablica[i].d;
+
+
             }
         }
         //usun wierzcholek z nieprzebadanych
@@ -541,12 +555,20 @@ void Graph::runBMatrix() {
     }
 
     //wyswietl
+    cout<<"\nPoczatek: "<<start;
     for (auto const i : tablica) {
-        cout<<"\nwierzcholek: "<<i.id<<"waga: "<<i.d<<"\ndroga: "<<i.p;
-        wyswietl = i.p;
-        while(wyswietl!=start){
-            wyswietl=tablica[wyswietl].p;
-            cout<<" "<<wyswietl;
+        if(i.id != start) {
+            wyswietl = i.p;
+            cout << "\nwierzcholek: " << i.id << "waga: " << i.d << "\ndroga: " ;
+            nieprzebadane.push_front(wyswietl);
+            while (wyswietl != start) {
+                wyswietl = tablica[wyswietl].p;
+                nieprzebadane.push_front(wyswietl);
+            }
+            while(!nieprzebadane.empty()){
+                cout<<nieprzebadane.front()<< " ";
+                nieprzebadane.pop_front();
+            }
         }
     }
 }

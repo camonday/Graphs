@@ -38,8 +38,8 @@ class Graph
 
     struct krawedz{
         int poczatek, koniec, waga;
-        string toString(){
-            return "\nPoczatek: " + to_string(poczatek) +"\tKoniec: "+ to_string(koniec) +"\tWaga: "+ to_string(waga);
+        string toString() const{
+            return "\nA: " + to_string(poczatek) +"\tB: "+ to_string(koniec) +"\tWaga: "+ to_string(waga);
         }
     };
     struct PorowanajWage{
@@ -73,6 +73,7 @@ private:
     void addRandConnection(bool tryb);
     bool czyZepsuje(int elem1, int elem2);
     int losujWierzcholek() const;
+    void addFullConnection();
 
 
 };
@@ -123,6 +124,10 @@ void Graph::create() {
 
 bool Graph::addConection(int A, int B, int waga) {  //zwraca false gdy nie uda sie dodac krawedzi
     if(macierz[A][B]!=0) return false;
+    while(waga==0){
+        waga=rand()%max_weight;
+        //cout<<"\n waga byla 0 a jest "<<waga;
+    }
     //lista
     listaSasiedztwa[A].push_front(sasiad{B,waga});
     //macierz
@@ -133,6 +138,7 @@ bool Graph::addConection(int A, int B, int waga) {  //zwraca false gdy nie uda s
         macierz[B][A] = waga;
     }
     //show();
+    //cout<<"\na: "<<A<<" b: "<<B<<" waga: "<<waga;
     return true;
 }
 
@@ -209,10 +215,10 @@ void Graph::generate(int wierz, int gestosc, bool czySkierowany) {
 
     //4. dopuki lista1 nie jest pusta:
     while (!list1.empty()) {
-        cout<<"\nszukam";
+        //cout<<"\nszukam";
         //4a. wylosuj wierzcholek z listy2
         adr=list2.cbegin();
-        for(int i = rand()%list2.size(); i>0; i--) adr.operator++();  //pamietaj o lepszym rand
+        for(int i = rand()%list2.size(); i>0; i--) ++adr;  //pamietaj o lepszym rand
         elem2 = *adr;
         //4b. wylosuj wierzcholek z listy 1, usun go z listy 1 i dodaj do listy 2
         adr = list1.cbegin();
@@ -223,10 +229,11 @@ void Graph::generate(int wierz, int gestosc, bool czySkierowany) {
         list2.push_back(elem1);
         //4c. wylosuj wage
         waga = rand()%max_weight;                               //jw
+        waga++;
         //4d. utworz polaczenie i zwieksz istniejace kraw
         addConection(elem2, elem1, waga);
         istKraw++;
-        cout<<"\n rozpinajajcy "<<list1.size();
+        //cout<<"\n rozpinajajcy "<<list1.size();
         //showList();
         //getch();
     }
@@ -244,12 +251,17 @@ void Graph::generate(int wierz, int gestosc, bool czySkierowany) {
     }
     // if 99 gest - dodaj dodatkowe 1/99 krawedzi i usun losowe 1/99 krawedzi
     if(gestosc==99){
-        while(istKraw!=maxKraw) {
+        /*while(istKraw!=maxKraw) {           //czy nie lepiej dodac krawedzie tam, gdzie w matrycy jest 0
             addRandConnection(false);
             istKraw++;
         }
+         */
+         addFullConnection();              //w. alternatywna
+         //cout<<"\ndodalem do 100%";
+         istKraw=maxKraw;
         while(istKraw!=krawedzie){
             deleteRandConnection();
+            //cout<<"\nusuwam";
             istKraw--;
         }
     }
@@ -269,24 +281,40 @@ void Graph::addRandConnection(bool tryb) {
 
 void Graph::deleteRandConnection() {
     int elem1, elem2;
+    sasiad* check1;
+    sasiad* check2 = nullptr;
     do{                                         //1. Wylosuj
         do{
             elem1=losujWierzcholek();
         } while (listaSasiedztwa[elem1].size()<2);
+        //cout<<"\nwylosowalem A usuwanego";
+        check1 = &listaSasiedztwa[elem1].front();
         do{
+            if(check1==check2){
+                //cout<<"\n Czy zepsujepowinno byc true";
+                break;
+            }
+            check2=&listaSasiedztwa[elem1].front();
             elem2=listaSasiedztwa[elem1].front().id;
             listaSasiedztwa[elem1].push_back(listaSasiedztwa[elem1].front());
             listaSasiedztwa[elem1].pop_front();
+
         } while (macierz[elem1][elem2]==0);
+       // cout<<"\nWylosowalem B usuwanego";
     } while(czyZepsuje(elem1, elem2));            //2. Sprawdz czy nie zaburzysz grafu
     //3. usun
+    //cout<<"\nusunolem ";
     listaSasiedztwa[elem1].pop_back();
+    //cout<<" 1. ";
     macierz[elem1][elem2]=0;
+   // cout<<" 2. ";
     if(!czySkierowany){
-       for(sasiad i = listaSasiedztwa[elem2].front(); i.id!=elem1; ){
+        //cout<<" 3. ";
+       for(sasiad i = listaSasiedztwa[elem2].front(); i.id!=elem1; i=listaSasiedztwa[elem2].front() ){
            listaSasiedztwa[elem2].push_back(listaSasiedztwa[elem2].front());
            listaSasiedztwa[elem2].pop_front();
        }
+        //cout<<" 4. ";
        listaSasiedztwa[elem2].pop_back();
        macierz[elem2][elem1]=0;
     }
@@ -298,8 +326,10 @@ bool Graph::czyZepsuje(int elem1, int elem2) {
     for(int i=0; i<wierzcholki; i++){
         suma += macierz[i][elem2];
     }
+    //cout<<"\nczy zepsuje 1: "<<suma;
     //2 odejmij od tego wage elem1:elem2
     suma -= macierz[elem1][elem2];
+    //cout<<"\nczy zepsuje 2: "<<suma;
     //3 sprawdz czy ostrzymales wiecej niz 0
     if(suma==0) return true;
     return false;
@@ -338,7 +368,7 @@ void Graph::runAList() { //Prim for a list
         check = sterta.top();
         sterta.pop();
         koniec = check.koniec;
-        if(std::find(wierzcholkiMST.begin(), wierzcholkiMST.end(), check.koniec)==wierzcholkiMST.end()){
+        if(std::find(wierzcholkiMST.begin(), wierzcholkiMST.end(), koniec)==wierzcholkiMST.end()){
             if(koniec!=wierzcholkiMST.back()){
                 //dodaj krawedz check do drzewwa rozpinajacego
                 krawedzieMST.push_back(check);
@@ -378,7 +408,7 @@ void Graph::runAMatrix() {
         check = sterta.top();
         sterta.pop();
         koniec = check.koniec;
-        if(std::find(wierzcholkiMST.begin(), wierzcholkiMST.end(), check.koniec)==wierzcholkiMST.end()){
+        if(std::find(wierzcholkiMST.begin(), wierzcholkiMST.end(), koniec)==wierzcholkiMST.end()){
             if(koniec!=wierzcholkiMST.back()){
                 //dodaj krawedz check do drzewwa rozpinajacego
                 krawedzieMST.push_back(check);
@@ -398,6 +428,21 @@ void Graph::runAMatrix() {
         sum+=i.waga;
     }
     cout<<"\nSuma wag: "<<sum;
+}
+
+void Graph::addFullConnection() {
+    for (int i = 0; i < wierzcholki; ++i) {
+        for(int j=0; j< wierzcholki; ++j){
+            if(macierz[i][j]==0 && i!=j){ //i!j poniewaz nie ma krawedzi z tylko jednym wierzcholkiem
+                addConection(i,j,rand()%max_weight);
+                cout<<"\ndodalem uzupelniajace";
+            }
+        }
+    }
+}
+
+void Graph::runBList() {
+
 }
 
 

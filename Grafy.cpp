@@ -62,6 +62,8 @@ public:
     void runBList();
     void runBMatrix();
 
+    virtual ~Graph();
+
 private:
     void clear();
     void create();
@@ -526,7 +528,7 @@ void Graph::runBList() {
 
     }
 
-    //wyswietl
+    /*//wyswietl
     cout<<"\n\n---lista---\nPoczatek = "<<start;
     for (int i=0; i<wierzcholki; i++) {
 
@@ -547,6 +549,7 @@ void Graph::runBList() {
         }
 
     }
+     */
 
 }
 
@@ -600,7 +603,7 @@ void Graph::runBMatrix() {
         //2) usun
         nieprzebadane.pop_back();
     }
-// /*
+ /*
     //wyswietl
     cout<<"\n\n---macierz---\nPoczatek: "<<start;
     for (auto const i : tablica) {
@@ -619,14 +622,18 @@ void Graph::runBMatrix() {
             cout<<i.id;
         }
     }
-    //*/
+    */
+}
+
+Graph::~Graph() {
+clear();
 }
 
 
 Graph myGraph;
 string fileName;
-int sizes[7] ={200, 400, 600, 800, 1000, 1200, 1400};
-int gestosci[3]={20,60,99};
+int sizes[7] ={6000, 8000, 10000, 12000, 14000};
+int gestosci[3]={2,6,9};
 
 void displayMenu(const string& info)
 {
@@ -698,7 +705,7 @@ void menu_a() {
 
             case '5':  //tutaj testy
                 std::ofstream file("test_prima.txt");
-                //file.imbue(std::locale(std::locale::classic(), new Comma));
+                file.imbue(std::locale(std::locale::classic(), new Comma));
                 //file<<"\nlist;matrix";
                 for(int size : sizes){
                     for(int gestosc : gestosci){
@@ -780,18 +787,14 @@ void menu_b() {
                 break;
             case '5':  //tutaj testy
                 std::ofstream file("test_dijkjstry.txt");
-                //file.imbue(std::locale(std::locale::classic(), new Comma));
+                file.imbue(std::locale(std::locale::classic(), new Comma));
                 //file<<"\nlist;matrix";
                 for(int size : sizes){
-                    for(int gestosc : gestosci){
-                        /*if (gestosc==99){
-                            file.close();
-                            return ;
-                        }*/
+
                         Graph grafy[50];
-                        cout<<"\nGeneruje grafy wielkosci "<<size<<" i gestosci "<<gestosc<<"\n";
+                        cout<<"\nGeneruje grafy wielkosci "<<size<<" i gestosci "<<2<<"\n";
                         for (int i = 0; i < 50; ++i) {
-                            grafy[i].generate(size,gestosc,false);
+                            grafy[i].generate(size,2,false);
                             cout<<i<<". ";
                         }
                         cout<<"\nlista";
@@ -825,8 +828,15 @@ void menu_b() {
 
                         }
                         file << ";"<<timeSum.count()<<"\n";
+                        for (auto &&i:grafy) {
+                             i.Graph::~Graph();
 
-                    }
+                        }
+                        if (size==8000){
+                            file.close();
+                            return ;
+                        }
+
 
                 }
                 file.close();

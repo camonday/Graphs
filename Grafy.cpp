@@ -250,14 +250,14 @@ void Graph::generate(int wierz, int gestosc, bool czySkierowany) {
         addRandConnection(false);
         istKraw++;
        // cout<<"\n"<<istKraw<<" "<<krawedzie;
-    }
+    }/*
     // if 99 gest - dodaj dodatkowe 1/99 krawedzi i usun losowe 1/99 krawedzi
     if(gestosc==99){
         /*while(istKraw!=maxKraw) {           //czy nie lepiej dodac krawedzie tam, gdzie w matrycy jest 0
             addRandConnection(false);
             istKraw++;
         }
-         */
+         * /
          addFullConnection();              //w. alternatywna
          cout<<"\ndodalem do 100%";
          istKraw=maxKraw;
@@ -271,6 +271,7 @@ void Graph::generate(int wierz, int gestosc, bool czySkierowany) {
             cout<<"\nusuwam "<<istKraw<<" "<<krawedzie;
         }
     }
+    */
 }
 
 void Graph::addRandConnection(bool tryb) {
@@ -476,63 +477,77 @@ void Graph::runBList() {
             int p;  // p — poprzednik
             int d;  // d - droga
     };
-    list<int> nieprzebadane;
+    auto cmp = [](wierzcholekSP* left, wierzcholekSP* right) { return (left->d) > (right->d); };
+    //priority_queue<wierzcholekSP*, vector<wierzcholekSP*>, decltype(cmp)> nieprzebadane(cmp);
+    vector<wierzcholekSP*> nieprzebadane;
+    list<int> nieprzebadaneL;
     wierzcholekSP tablica[wierzcholki];
     wierzcholekSP min{};
     int wyswietl;
 
     for (int i=0; i<wierzcholki; i++) {
-        nieprzebadane.push_front(i);
         tablica[i] = wierzcholekSP{i,INT_MAX,INT_MAX};
+        if(i==start) tablica[i].d=0;
+        nieprzebadane.push_back(&(tablica[i]));
         //cout<<"\n"<<tablica[i].d<<" "<<i;
     }
-    tablica[start].d=0;
+
+    make_heap(nieprzebadane.begin(), nieprzebadane.end(),cmp);
+
 
     while(!nieprzebadane.empty()) {
         //wybierz wierzcholek o najmnijeszym d
-        min = tablica[nieprzebadane.front()];
-        for (auto const i : nieprzebadane) {
-            if (min.d > tablica[i].d) min=tablica[i];
-        }
+        min = *(nieprzebadane.front());
+
         //relaksacja sasiadow
+        //cout<<"\nrelaksacja\n";
         for (auto const i : listaSasiedztwa[min.id]) {
+            //cout<<"\n"<<i.id;
+            //cout<<" "<<tablica[i.id].d;
             if((i.wagaKrawedzi+min.d)<tablica[i.id].d){
                 tablica[i.id].d = i.wagaKrawedzi+min.d;
                 tablica[i.id].p = min.id;
+                //cout<<" "<<tablica[i.id].d;
+                make_heap(nieprzebadane.begin(), nieprzebadane.end(),cmp);
             }
         }
-        //usun wierzcholek z nieprzebadanych
-        //1) przesun min na poczatek
-        while(nieprzebadane.front()!=min.id) {
-            nieprzebadane.push_back(nieprzebadane.front());
-            nieprzebadane.pop_front();
-        }
-        //2) usun
-        nieprzebadane.pop_front();
+        //cout<<"min droga przed usunieciem: "<<nieprzebadane.front()->d;
+        std::pop_heap(nieprzebadane.begin(), nieprzebadane.end(), cmp);
+        //cout<<"min droga po usunieciu: "<<nieprzebadane.front()->d;
+        nieprzebadane.pop_back();
+       // cout<<"\n heap:\n";
+       // for( auto &&i : nieprzebadane){
+            //cout<<i->id<<" #"<<i->d<<" p: "<<i->p<<"\n";
+       // }
+        //naprawa?
+
+             //usun wierzcholek z nieprzebadanych
+        //getche();
+
     }
-/*
+
     //wyswietl
-    cout<<"Poczatek = "<<start;
+    cout<<"\n\n---lista---\nPoczatek = "<<start;
     for (int i=0; i<wierzcholki; i++) {
 
         if(i!=start){
         wyswietl = tablica[i].p;
         cout<<"\nwierzcholek: "<<i<<" waga: "<<tablica[i].d<<"\ndroga: ";
 
-            nieprzebadane.push_front(wyswietl);
+            nieprzebadaneL.push_front(wyswietl);
             while (wyswietl != start) {
                 wyswietl = tablica[wyswietl].p;
-                nieprzebadane.push_front(wyswietl);
+                nieprzebadaneL.push_front(wyswietl);
             }
-            while(!nieprzebadane.empty()){
-                cout<<nieprzebadane.front()<< " ";
-                nieprzebadane.pop_front();
+            while(!nieprzebadaneL.empty()){
+                cout<<nieprzebadaneL.front()<< " ";
+                nieprzebadaneL.pop_front();
             }
             cout<<i;
         }
 
     }
-    */
+
 }
 
 void Graph::runBMatrix() {
@@ -541,67 +556,70 @@ void Graph::runBMatrix() {
         int p;  // p — poprzednik
         int d;  // d - droga
     };
-    list<int> nieprzebadane;
+    auto cmp = [](wierzcholekSP* left, wierzcholekSP* right) { return (left->d) > (right->d); };
+    //priority_queue<wierzcholekSP, vector<wierzcholekSP>, decltype(cmp)> nieprzebadane(cmp);
+    vector<wierzcholekSP*> nieprzebadane;
+    list<int> nieprzebadaneL;
     wierzcholekSP tablica[wierzcholki];
     wierzcholekSP min{};
     int wyswietl;
 
-    for (int i=0; i<wierzcholki; ++i) {
-        nieprzebadane.push_front(i);
+    for (int i=0; i<wierzcholki; i++) {
         tablica[i] = wierzcholekSP{i,INT_MAX,INT_MAX};
+        if(i==start) tablica[i].d=0;
+        nieprzebadane.push_back(&(tablica[i]));
+        //cout<<"\n"<<tablica[i].d<<" "<<i;
     }
-    tablica[start].d=0;
 
-   // cout<<"\n---MACIERZ---\n";
+    make_heap(nieprzebadane.begin(), nieprzebadane.end(),cmp);
+
+
+    // cout<<"\n---MACIERZ---\n";
 
     while(!nieprzebadane.empty()) {
         //wybierz wierzcholek o najmnijeszym d
-        min = tablica[nieprzebadane.front()];
-        for (auto const i : nieprzebadane) {
-            if (min.d > tablica[i].d) min=tablica[i];
-        }
+        min = *(nieprzebadane.front());
+
         //relaksacja sasiadow
         for (int i=0; i<wierzcholki; ++i) {
             if(0<macierz[min.id][i] && (macierz[min.id][i]+min.d)<tablica[i].d){
-               /* cout<<"\nRelaksacja\n";
+               /*cout<<"\nRelaksacja\n";
                 cout<<"A: "<<min.id<<" B: "<<i;
                 cout<<"\ndroga a: "<<min.d<<" krawedz ab: "<<macierz[min.id][i]<<" razem: "<<macierz[min.id][i]+min.d;
-                cout<<" droga b: "<<tablica[i].d; */
+                cout<<" droga b: "<<tablica[i].d;*/
                 tablica[i].d = macierz[min.id][i]+min.d;
                 tablica[i].p = min.id;
                 //cout<<"\nTeraz droga b: "<<tablica[i].d;
-
+                make_heap(nieprzebadane.begin(), nieprzebadane.end(),cmp);
 
             }
         }
         //usun wierzcholek z nieprzebadanych
-        //1) przesun min na poczatek
-        while(nieprzebadane.front()!=min.id) {
-            nieprzebadane.push_back(nieprzebadane.front());
-            nieprzebadane.pop_front();
-        }
+        //1) przesun min na koniec
+       std::pop_heap(nieprzebadane.begin(), nieprzebadane.end(), cmp);
         //2) usun
-        nieprzebadane.pop_front();
+        nieprzebadane.pop_back();
     }
-/*
+// /*
     //wyswietl
-    cout<<"\nPoczatek: "<<start;
+    cout<<"\n\n---macierz---\nPoczatek: "<<start;
     for (auto const i : tablica) {
         if(i.id != start) {
             wyswietl = i.p;
-            cout << "\nwierzcholek: " << i.id << "waga: " << i.d << "\ndroga: " ;
-            nieprzebadane.push_front(wyswietl);
+            cout << "\nwierzcholek: " << i.id << " waga: " << i.d << "\ndroga: " ;
+            nieprzebadaneL.push_front(wyswietl);
             while (wyswietl != start) {
                 wyswietl = tablica[wyswietl].p;
-                nieprzebadane.push_front(wyswietl);
+                nieprzebadaneL.push_front(wyswietl);
             }
-            while(!nieprzebadane.empty()){
-                cout<<nieprzebadane.front()<< " ";
-                nieprzebadane.pop_front();
+            while(!nieprzebadaneL.empty()){
+                cout<<nieprzebadaneL.front()<< " ";
+                nieprzebadaneL.pop_front();
             }
+            cout<<i.id;
         }
     }
-    */
+    //*/
 }
 
 
@@ -715,7 +733,7 @@ void menu_a() {
                             //std::cout << std::endl << i;
                             timeStart = steady_clock::now();
 
-                            i.runAList();
+                            i.runAMatrix();
 
                             timeEnd = steady_clock::now();
 
@@ -727,14 +745,14 @@ void menu_a() {
                         file << ";"<<timeSum.count()<<"\n";
 
                     }
-                    file.close();
-                }
 
+                }
+                file.close();
                 break;
 
         }
-    } while (opt != 0);
-    return;
+    } while (opt != '0');
+
 }
 void menu_b() {
     char opt;
@@ -760,13 +778,63 @@ void menu_b() {
             case '4': //tutaj wykonanie algorytmu
                 runGraph();
                 break;
-
             case '5':  //tutaj testy
+                std::ofstream file("test_dijkjstry.txt");
+                //file.imbue(std::locale(std::locale::classic(), new Comma));
+                //file<<"\nlist;matrix";
+                for(int size : sizes){
+                    for(int gestosc : gestosci){
+                        /*if (gestosc==99){
+                            file.close();
+                            return ;
+                        }*/
+                        Graph grafy[50];
+                        cout<<"\nGeneruje grafy wielkosci "<<size<<" i gestosci "<<gestosc<<"\n";
+                        for (int i = 0; i < 50; ++i) {
+                            grafy[i].generate(size,gestosc,false);
+                            cout<<i<<". ";
+                        }
+                        cout<<"\nlista";
+                        timeSum-=timeSum;
+                        for(auto & i : grafy){
+                            timeStart = steady_clock::now();
+
+                            i.runBList();
+
+                            timeEnd = steady_clock::now();
+
+                            timeTemp = duration_cast<duration<double>>(timeEnd - timeStart);
+                            timeSum += timeTemp;
+                            //std::cout << " timeTemp " << timeTemp.count();
+
+                        }
+                        file <<timeSum.count();
+                        cout<<"\nmacierz";
+                        timeSum-=timeSum;
+                        for(auto & i : grafy){
+                            //std::cout << std::endl << i;
+                            timeStart = steady_clock::now();
+
+                            i.runBMatrix();
+
+                            timeEnd = steady_clock::now();
+
+                            timeTemp = duration_cast<duration<double>>(timeEnd - timeStart);
+                            timeSum += timeTemp;
+                            //std::cout << " timeTemp " << timeTemp.count();
+
+                        }
+                        file << ";"<<timeSum.count()<<"\n";
+
+                    }
+
+                }
+                file.close();
 
                 break;
 
         }
-    } while (opt != 0);
+    } while (opt != '0');
 }
 
 int main(int argc, char* argv[])

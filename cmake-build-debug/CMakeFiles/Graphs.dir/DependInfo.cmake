@@ -8,7 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "C:/Users/Asus/CLionProjects/Graphs/Grafy.cpp" "CMakeFiles/Graphs.dir/Grafy.cpp.obj" "gcc" "CMakeFiles/Graphs.dir/Grafy.cpp.obj.d"
+  "C:/Users/arkad/CLionProjects/Graphs2/Grafy.cpp" "CMakeFiles/Graphs.dir/Grafy.cpp.obj" "gcc" "CMakeFiles/Graphs.dir/Grafy.cpp.obj.d"
   )
 
 # Targets to which this target links.

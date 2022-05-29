@@ -53,10 +53,10 @@ RM = "C:\Program Files\JetBrains\CLion 2021.3.3\bin\cmake\win\bin\cmake.exe" -E 
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = C:\Users\Asus\CLionProjects\Graphs
+CMAKE_SOURCE_DIR = C:\Users\arkad\CLionProjects\Graphs2
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = C:\Users\Asus\CLionProjects\Graphs\cmake-build-debug
+CMAKE_BINARY_DIR = C:\Users\arkad\CLionProjects\Graphs2\cmake-build-debug
 
 #=============================================================================
 # Directory level rules for the build root directory
@@ -80,14 +80,14 @@ clean: CMakeFiles/Graphs.dir/clean
 CMakeFiles/Graphs.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Graphs.dir\build.make CMakeFiles/Graphs.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Graphs.dir\build.make CMakeFiles/Graphs.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=C:\Users\Asus\CLionProjects\Graphs\cmake-build-debug\CMakeFiles --progress-num=1,2 "Built target Graphs"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=C:\Users\arkad\CLionProjects\Graphs2\cmake-build-debug\CMakeFiles --progress-num=1,2 "Built target Graphs"
 .PHONY : CMakeFiles/Graphs.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/Graphs.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\Asus\CLionProjects\Graphs\cmake-build-debug\CMakeFiles 2
+	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\arkad\CLionProjects\Graphs2\cmake-build-debug\CMakeFiles 2
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 CMakeFiles/Graphs.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\Asus\CLionProjects\Graphs\cmake-build-debug\CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\arkad\CLionProjects\Graphs2\cmake-build-debug\CMakeFiles 0
 .PHONY : CMakeFiles/Graphs.dir/rule
 
 # Convenience name for target.
